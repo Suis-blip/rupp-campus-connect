@@ -5,8 +5,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
+  if (loading) return null;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
   return (

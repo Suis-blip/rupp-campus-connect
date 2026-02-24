@@ -6,6 +6,7 @@ import {
   MessageSquare,
   LogOut,
   GraduationCap,
+  School,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -28,6 +29,7 @@ const navItems = [
   { title: "Gradebook", url: "/gradebook", icon: BookOpen },
   { title: "Schedule", url: "/schedule", icon: CalendarDays },
   { title: "Messages", url: "/messages", icon: MessageSquare },
+  { title: "Classes", url: "/classes", icon: School },
 ];
 
 export function AppSidebar() {

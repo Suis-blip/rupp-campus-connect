@@ -12,6 +12,7 @@ import Attendance from "./pages/Attendance";
 import Gradebook from "./pages/Gradebook";
 import Schedule from "./pages/Schedule";
 import Messages from "./pages/Messages";
+import Classes from "./pages/Classes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/gradebook" element={<DashboardLayout><Gradebook /></DashboardLayout>} />
             <Route path="/schedule" element={<DashboardLayout><Schedule /></DashboardLayout>} />
             <Route path="/messages" element={<DashboardLayout><Messages /></DashboardLayout>} />
+            <Route path="/classes" element={<DashboardLayout><Classes /></DashboardLayout>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
