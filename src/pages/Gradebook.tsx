@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { BookOpen } from "lucide-react";
 
 interface GradeEntry {
   id: string;
@@ -68,10 +69,10 @@ const Gradebook = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Gradebook</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Gradebook</h1>
           <p className="text-sm text-muted-foreground mt-1">Enter and manage student grades</p>
         </div>
         <Select value={selectedCourse} onValueChange={setSelectedCourse}>
@@ -88,29 +89,39 @@ const Gradebook = () => {
 
       <Card className="shadow-card overflow-hidden">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">Grade Sheet</CardTitle>
-          <p className="text-xs text-muted-foreground">Midterm 30% · Final 40% · Assignment 30%</p>
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <div className="h-7 w-7 rounded-lg bg-accent flex items-center justify-center">
+              <BookOpen className="h-3.5 w-3.5 text-accent-foreground" />
+            </div>
+            Grade Sheet
+          </CardTitle>
+          <p className="text-xs text-muted-foreground ml-9">Midterm 30% · Final 40% · Assignment 30%</p>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-secondary/50">
-                  <TableHead className="font-semibold">Student</TableHead>
-                  <TableHead className="font-semibold text-center w-24">Midterm</TableHead>
-                  <TableHead className="font-semibold text-center w-24">Final</TableHead>
-                  <TableHead className="font-semibold text-center w-24">Assignment</TableHead>
-                  <TableHead className="font-semibold text-center w-20">Total</TableHead>
-                  <TableHead className="font-semibold text-center w-20">Grade</TableHead>
+                <TableRow className="bg-muted/50 hover:bg-muted/50">
+                  <TableHead className="font-semibold text-xs uppercase tracking-wide">Student</TableHead>
+                  <TableHead className="font-semibold text-xs uppercase tracking-wide text-center w-24">Midterm</TableHead>
+                  <TableHead className="font-semibold text-xs uppercase tracking-wide text-center w-24">Final</TableHead>
+                  <TableHead className="font-semibold text-xs uppercase tracking-wide text-center w-24">Assignment</TableHead>
+                  <TableHead className="font-semibold text-xs uppercase tracking-wide text-center w-20">Total</TableHead>
+                  <TableHead className="font-semibold text-xs uppercase tracking-wide text-center w-20">Grade</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {grades.map((g) => (
-                  <TableRow key={g.id} className="hover:bg-secondary/30">
+                  <TableRow key={g.id} className="hover:bg-muted/30">
                     <TableCell>
-                      <div>
-                        <p className="text-sm font-medium">{g.name}</p>
-                        <p className="text-xs text-muted-foreground">{g.studentId}</p>
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-[10px] font-bold shrink-0">
+                          {g.name.split(" ").map(n => n[0]).join("")}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">{g.name}</p>
+                          <p className="text-xs text-muted-foreground">{g.studentId}</p>
+                        </div>
                       </div>
                     </TableCell>
                     {(["midterm", "final", "assignment"] as const).map((field) => (
@@ -126,10 +137,10 @@ const Gradebook = () => {
                         />
                       </TableCell>
                     ))}
-                    <TableCell className="text-center font-semibold text-sm">{g.total ?? "—"}</TableCell>
+                    <TableCell className="text-center font-bold text-sm">{g.total ?? "—"}</TableCell>
                     <TableCell className="text-center">
                       {g.grade !== "—" ? (
-                        <Badge className={`${gradeColor[g.grade]} text-xs font-bold`}>{g.grade}</Badge>
+                        <Badge className={`${gradeColor[g.grade]} text-xs font-bold px-2.5`}>{g.grade}</Badge>
                       ) : (
                         <span className="text-muted-foreground text-sm">—</span>
                       )}

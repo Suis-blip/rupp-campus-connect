@@ -21,15 +21,14 @@ import {
   SidebarMenuItem,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const navItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Classes", url: "/classes", icon: School },
   { title: "Attendance", url: "/attendance", icon: ClipboardCheck },
   { title: "Gradebook", url: "/gradebook", icon: BookOpen },
   { title: "Schedule", url: "/schedule", icon: CalendarDays },
   { title: "Messages", url: "/messages", icon: MessageSquare },
-  { title: "Classes", url: "/classes", icon: School },
 ];
 
 export function AppSidebar() {
@@ -37,20 +36,21 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="border-r border-sidebar-border">
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-sidebar-border">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-primary">
+      {/* Brand */}
+      <div className="flex items-center gap-3 px-5 py-5 border-b border-sidebar-border">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary shadow-glow">
           <GraduationCap className="h-5 w-5 text-primary-foreground" />
         </div>
         <div className="flex flex-col">
-          <span className="text-sm font-semibold text-sidebar-foreground">RUPP Portal</span>
-          <span className="text-xs text-muted-foreground">Teacher System</span>
+          <span className="text-sm font-bold text-sidebar-foreground tracking-tight">RUPP Portal</span>
+          <span className="text-[11px] text-muted-foreground">University System</span>
         </div>
       </div>
 
       <SidebarContent className="px-3 py-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 mb-2">
-            Main Menu
+          <SidebarGroupLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest px-3 mb-1">
+            Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -60,10 +60,10 @@ export function AppSidebar() {
                     <NavLink
                       to={item.url}
                       end={item.url === "/dashboard"}
-                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                      activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
+                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium text-sidebar-foreground/80 transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold shadow-sm"
                     >
-                      <item.icon className="h-[18px] w-[18px]" />
+                      <item.icon className="h-[18px] w-[18px] shrink-0" />
                       <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
@@ -74,18 +74,20 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border p-4">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-9 w-9">
-            <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
-              {user?.name?.split(" ").map((n) => n[0]).join("") || "U"}
-            </AvatarFallback>
-          </Avatar>
+      <SidebarFooter className="border-t border-sidebar-border p-3">
+        <div className="flex items-center gap-3 rounded-lg p-2 hover:bg-sidebar-accent transition-colors">
+          <div className="h-9 w-9 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold shrink-0">
+            {user?.name?.split(" ").map((n) => n[0]).join("").slice(0, 2) || "U"}
+          </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-sidebar-foreground truncate">{user?.name}</p>
-            <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
+            <p className="text-[11px] text-muted-foreground capitalize">{user?.role}</p>
           </div>
-          <button onClick={logout} className="p-2 rounded-lg text-muted-foreground hover:bg-sidebar-accent hover:text-destructive transition-colors" title="Logout">
+          <button
+            onClick={logout}
+            className="p-2 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+            title="Sign out"
+          >
             <LogOut className="h-4 w-4" />
           </button>
         </div>
