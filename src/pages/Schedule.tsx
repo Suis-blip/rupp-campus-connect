@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, MapPin } from "lucide-react";
+import { Clock, MapPin, CalendarDays } from "lucide-react";
 
 interface ScheduleItem {
   id: string;
@@ -31,14 +31,14 @@ const typeConfig = {
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
 const Schedule = () => (
-  <div className="space-y-6">
+  <div className="space-y-6 animate-fade-in-up">
     <div>
-      <h1 className="text-2xl font-bold text-foreground">Schedule</h1>
+      <h1 className="text-2xl font-bold text-foreground tracking-tight">Schedule</h1>
       <p className="text-sm text-muted-foreground mt-1">Your weekly class schedule</p>
     </div>
 
     <Tabs defaultValue="week" className="space-y-4">
-      <TabsList>
+      <TabsList className="bg-muted/60">
         <TabsTrigger value="week">Week View</TabsTrigger>
         <TabsTrigger value="list">List View</TabsTrigger>
       </TabsList>
@@ -50,11 +50,17 @@ const Schedule = () => (
           return (
             <Card key={day} className="shadow-card">
               <CardHeader className="pb-2 pt-4">
-                <CardTitle className="text-sm font-semibold text-primary">{day}</CardTitle>
+                <CardTitle className="text-sm font-semibold text-primary flex items-center gap-2">
+                  <CalendarDays className="h-3.5 w-3.5" />
+                  {day}
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2 pb-4">
+              <CardContent className="space-y-1.5 pb-4">
                 {items.map((item) => (
-                  <div key={item.id} className="flex items-center gap-4 rounded-xl bg-secondary/30 p-3.5">
+                  <div key={item.id} className="flex items-center gap-4 rounded-xl bg-muted/40 p-3.5 hover:bg-muted/70 transition-colors">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-primary text-primary-foreground shrink-0">
+                      <Clock className="h-4 w-4" />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-card-foreground">{item.course}</p>
                       <div className="flex items-center gap-3 mt-1">
@@ -77,9 +83,12 @@ const Schedule = () => (
 
       <TabsContent value="list">
         <Card className="shadow-card">
-          <CardContent className="p-4 space-y-2">
+          <CardContent className="p-4 space-y-1.5">
             {weekSchedule.map((item) => (
-              <div key={item.id} className="flex items-center gap-4 rounded-xl bg-secondary/30 p-3.5">
+              <div key={item.id} className="flex items-center gap-4 rounded-xl bg-muted/40 p-3.5 hover:bg-muted/70 transition-colors">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-primary text-primary-foreground shrink-0">
+                  <Clock className="h-4 w-4" />
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-card-foreground">{item.course}</p>
                   <div className="flex items-center gap-3 mt-1">

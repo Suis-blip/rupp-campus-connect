@@ -7,9 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Copy, Users, BookOpen, Loader2 } from "lucide-react";
+import { Plus, Copy, Users, BookOpen, Loader2, MapPin, CalendarDays, Hash } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Classes = () => {
@@ -18,7 +17,6 @@ const Classes = () => {
   const queryClient = useQueryClient();
   const isTeacher = user?.role === "teacher" || user?.role === "admin";
 
-  // Teacher: fetch own classes
   const { data: myClasses = [], isLoading: loadingClasses } = useQuery({
     queryKey: ["my-classes"],
     queryFn: async () => {
@@ -32,7 +30,6 @@ const Classes = () => {
     enabled: !!user,
   });
 
-  // Student: fetch enrollments
   const { data: enrollments = [], isLoading: loadingEnrollments } = useQuery({
     queryKey: ["my-enrollments"],
     queryFn: async () => {
@@ -47,10 +44,10 @@ const Classes = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Classes</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Classes</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {isTeacher ? "Manage your classes and invite students" : "View your enrolled classes"}
           </p>
@@ -60,7 +57,7 @@ const Classes = () => {
       </div>
 
       {loadingClasses || loadingEnrollments ? (
-        <div className="flex items-center justify-center py-12">
+        <div className="flex items-center justify-center py-16">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
       ) : isTeacher ? (
@@ -82,11 +79,13 @@ function TeacherClassList({ classes }: { classes: any[] }) {
 
   if (classes.length === 0) {
     return (
-      <Card className="shadow-card">
-        <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-          <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
+      <Card className="shadow-card border-dashed">
+        <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="h-14 w-14 rounded-2xl bg-accent flex items-center justify-center mb-4">
+            <BookOpen className="h-6 w-6 text-accent-foreground" />
+          </div>
           <h3 className="text-lg font-semibold text-foreground">No classes yet</h3>
-          <p className="text-sm text-muted-foreground mt-1">Create your first class to get started.</p>
+          <p className="text-sm text-muted-foreground mt-1 max-w-sm">Create your first class to get started and share the invite code with students.</p>
         </CardContent>
       </Card>
     );
@@ -95,24 +94,42 @@ function TeacherClassList({ classes }: { classes: any[] }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {classes.map((cls) => (
-        <Card key={cls.id} className="shadow-card">
+        <Card key={cls.id} className="shadow-card hover:shadow-elevated transition-all duration-200 group">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">{cls.name}</CardTitle>
-            <p className="text-xs text-muted-foreground">{cls.code}</p>
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle className="text-base font-semibold group-hover:text-primary transition-colors">{cls.name}</CardTitle>
+                <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                  <Hash className="h-3 w-3" />{cls.code}
+                </p>
+              </div>
+              {cls.semester && (
+                <Badge variant="secondary" className="text-[10px] font-medium">{cls.semester} {cls.year}</Badge>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-muted-foreground line-clamp-2">{cls.description || "No description"}</p>
             <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-              {cls.schedule && <Badge variant="secondary">{cls.schedule}</Badge>}
-              {cls.room && <Badge variant="outline">{cls.room}</Badge>}
-              <Badge variant="outline">Cap: {cls.capacity}</Badge>
-              {cls.semester && <Badge variant="outline">{cls.semester} {cls.year}</Badge>}
+              {cls.schedule && (
+                <span className="flex items-center gap-1 bg-muted/60 rounded-md px-2 py-1">
+                  <CalendarDays className="h-3 w-3" />{cls.schedule}
+                </span>
+              )}
+              {cls.room && (
+                <span className="flex items-center gap-1 bg-muted/60 rounded-md px-2 py-1">
+                  <MapPin className="h-3 w-3" />{cls.room}
+                </span>
+              )}
+              <span className="flex items-center gap-1 bg-muted/60 rounded-md px-2 py-1">
+                <Users className="h-3 w-3" />Cap: {cls.capacity}
+              </span>
             </div>
             <div className="flex items-center gap-2 pt-2 border-t border-border">
-              <code className="flex-1 rounded bg-secondary px-2 py-1 text-xs font-mono text-foreground">
+              <code className="flex-1 rounded-md bg-muted/60 px-2.5 py-1.5 text-xs font-mono text-foreground tracking-wider">
                 {cls.invite_code}
               </code>
-              <Button variant="ghost" size="sm" onClick={() => copyCode(cls.invite_code)}>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-primary" onClick={() => copyCode(cls.invite_code)}>
                 <Copy className="h-3.5 w-3.5" />
               </Button>
             </div>
@@ -126,11 +143,13 @@ function TeacherClassList({ classes }: { classes: any[] }) {
 function StudentClassList({ enrollments }: { enrollments: any[] }) {
   if (enrollments.length === 0) {
     return (
-      <Card className="shadow-card">
-        <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-          <Users className="h-12 w-12 text-muted-foreground mb-4" />
+      <Card className="shadow-card border-dashed">
+        <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="h-14 w-14 rounded-2xl bg-accent flex items-center justify-center mb-4">
+            <Users className="h-6 w-6 text-accent-foreground" />
+          </div>
           <h3 className="text-lg font-semibold text-foreground">Not enrolled in any class</h3>
-          <p className="text-sm text-muted-foreground mt-1">Use an invite code from your teacher to join a class.</p>
+          <p className="text-sm text-muted-foreground mt-1 max-w-sm">Ask your teacher for an invite code and join your first class.</p>
         </CardContent>
       </Card>
     );
@@ -139,16 +158,26 @@ function StudentClassList({ enrollments }: { enrollments: any[] }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {enrollments.map((e) => (
-        <Card key={e.id} className="shadow-card">
+        <Card key={e.id} className="shadow-card hover:shadow-elevated transition-all duration-200">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold">{e.classes?.name}</CardTitle>
-            <p className="text-xs text-muted-foreground">{e.classes?.code}</p>
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <Hash className="h-3 w-3" />{e.classes?.code}
+            </p>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">{e.classes?.description || "No description"}</p>
             <div className="flex flex-wrap gap-2 text-xs mt-3">
-              {e.classes?.room && <Badge variant="outline">{e.classes.room}</Badge>}
-              {e.classes?.schedule && <Badge variant="secondary">{e.classes.schedule}</Badge>}
+              {e.classes?.room && (
+                <span className="flex items-center gap-1 bg-muted/60 rounded-md px-2 py-1">
+                  <MapPin className="h-3 w-3" />{e.classes.room}
+                </span>
+              )}
+              {e.classes?.schedule && (
+                <span className="flex items-center gap-1 bg-muted/60 rounded-md px-2 py-1">
+                  <CalendarDays className="h-3 w-3" />{e.classes.schedule}
+                </span>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -240,7 +269,7 @@ function CreateClassDialog() {
               <Input type="number" value={form.year} onChange={set("year")} />
             </div>
           </div>
-          <Button type="submit" className="w-full" disabled={mutation.isPending}>
+          <Button type="submit" className="w-full h-11 font-semibold" disabled={mutation.isPending}>
             {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Create Class
           </Button>
@@ -259,7 +288,6 @@ function JoinClassDialog() {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      // Find class by invite code
       const { data: cls, error: findErr } = await supabase
         .from("classes")
         .select("id, name")
@@ -268,7 +296,6 @@ function JoinClassDialog() {
       if (findErr) throw findErr;
       if (!cls) throw new Error("Invalid invite code. Please check and try again.");
 
-      // Enroll
       const { error: enrollErr } = await supabase.from("enrollments").insert({
         student_id: user!.id,
         class_id: cls.id,
@@ -302,9 +329,9 @@ function JoinClassDialog() {
         <form onSubmit={(e) => { e.preventDefault(); mutation.mutate(); }} className="space-y-4">
           <div className="space-y-2">
             <Label>Invite Code</Label>
-            <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Enter invite code from your teacher" required />
+            <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Enter invite code from your teacher" required className="font-mono tracking-wider text-center text-lg h-12" />
           </div>
-          <Button type="submit" className="w-full" disabled={mutation.isPending}>
+          <Button type="submit" className="w-full h-11 font-semibold" disabled={mutation.isPending}>
             {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Join Class
           </Button>

@@ -1,7 +1,9 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { StatCard } from "@/components/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, ClipboardCheck, BookOpen, CalendarDays, Clock, TrendingUp } from "lucide-react";
+import { Users, ClipboardCheck, BookOpen, CalendarDays, Clock, TrendingUp, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const recentActivity = [
   { action: "Marked attendance for CS101", time: "10 minutes ago", type: "attendance" },
@@ -18,14 +20,26 @@ const upcomingClasses = [
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Welcome back, {user?.name?.split(" ")[0]}</h1>
-        <p className="text-sm text-muted-foreground mt-1">Here's what's happening today</p>
+    <div className="space-y-6 animate-fade-in-up">
+      {/* Greeting */}
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">
+            Welcome back, {user?.name?.split(" ")[0]} 👋
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">Here's what's happening today</p>
+        </div>
+        <Button variant="outline" size="sm" className="gap-2 self-start sm:self-auto" onClick={() => navigate("/schedule")}>
+          <CalendarDays className="h-4 w-4" />
+          View Schedule
+          <ArrowRight className="h-3 w-3" />
+        </Button>
       </div>
 
+      {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total Students" value={156} subtitle="Across 4 courses" icon={<Users className="h-5 w-5" />} trend={{ value: "12 new", positive: true }} />
         <StatCard title="Attendance Rate" value="94.2%" subtitle="This week" icon={<ClipboardCheck className="h-5 w-5" />} trend={{ value: "2.1%", positive: true }} />
@@ -33,22 +47,26 @@ const Dashboard = () => {
         <StatCard title="Upcoming Classes" value={3} subtitle="Today" icon={<CalendarDays className="h-5 w-5" />} />
       </div>
 
+      {/* Cards Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="shadow-card">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <CalendarDays className="h-4 w-4 text-primary" /> Today's Classes
+            <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
+              <div className="h-7 w-7 rounded-lg bg-accent flex items-center justify-center">
+                <CalendarDays className="h-3.5 w-3.5 text-accent-foreground" />
+              </div>
+              Today's Classes
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-2">
             {upcomingClasses.map((cls, i) => (
-              <div key={i} className="flex items-center gap-4 rounded-xl bg-secondary/50 p-3.5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+              <div key={i} className="flex items-center gap-4 rounded-xl bg-muted/50 p-3.5 hover:bg-muted transition-colors">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-primary text-primary-foreground shrink-0">
                   <Clock className="h-4 w-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-card-foreground truncate">{cls.course}</p>
-                  <p className="text-xs text-muted-foreground">{cls.time} · {cls.room}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{cls.time} · {cls.room}</p>
                 </div>
               </div>
             ))}
@@ -57,17 +75,20 @@ const Dashboard = () => {
 
         <Card className="shadow-card">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-primary" /> Recent Activity
+            <CardTitle className="text-sm font-semibold flex items-center gap-2 text-foreground">
+              <div className="h-7 w-7 rounded-lg bg-accent flex items-center justify-center">
+                <TrendingUp className="h-3.5 w-3.5 text-accent-foreground" />
+              </div>
+              Recent Activity
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-1">
             {recentActivity.map((item, i) => (
-              <div key={i} className="flex items-start gap-3 py-2">
-                <div className="mt-1 h-2 w-2 rounded-full bg-primary shrink-0" />
+              <div key={i} className="flex items-start gap-3 py-2.5 px-2 rounded-lg hover:bg-muted/50 transition-colors">
+                <div className="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0" />
                 <div>
                   <p className="text-sm text-card-foreground">{item.action}</p>
-                  <p className="text-xs text-muted-foreground">{item.time}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.time}</p>
                 </div>
               </div>
             ))}

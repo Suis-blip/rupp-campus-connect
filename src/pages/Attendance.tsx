@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Check, X, Clock } from "lucide-react";
+import { Check, X, Clock, Users } from "lucide-react";
 
 type Status = "present" | "absent" | "late" | "unmarked";
 
@@ -32,6 +32,13 @@ const statusConfig: Record<Status, { label: string; variant: "default" | "destru
   unmarked: { label: "Unmarked", variant: "outline", icon: Clock },
 };
 
+const statColors: Record<Status, string> = {
+  present: "bg-success/10 text-success border-success/20",
+  absent: "bg-destructive/10 text-destructive border-destructive/20",
+  late: "bg-warning/10 text-warning border-warning/20",
+  unmarked: "bg-muted text-muted-foreground border-border",
+};
+
 const Attendance = () => {
   const [students, setStudents] = useState<Student[]>(initialStudents);
   const [selectedCourse, setSelectedCourse] = useState("cs101");
@@ -50,10 +57,10 @@ const Attendance = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Attendance</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Attendance</h1>
           <p className="text-sm text-muted-foreground mt-1">Mark and track student attendance</p>
         </div>
         <div className="flex items-center gap-3">
@@ -67,16 +74,18 @@ const Attendance = () => {
               <SelectItem value="cs301">CS301 - Algorithms</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={markAllPresent} variant="outline" size="sm">Mark All Present</Button>
+          <Button onClick={markAllPresent} variant="outline" size="sm" className="gap-1.5">
+            <Check className="h-3.5 w-3.5" /> All Present
+          </Button>
         </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-4">
         {(["present", "absent", "late", "unmarked"] as Status[]).map((s) => (
-          <Card key={s} className="shadow-card">
+          <Card key={s} className={`border ${statColors[s]} shadow-none`}>
             <CardContent className="p-4 flex items-center justify-between">
-              <span className="text-sm font-medium capitalize text-muted-foreground">{s}</span>
-              <span className="text-xl font-bold text-card-foreground">{stats[s]}</span>
+              <span className="text-sm font-medium capitalize">{s}</span>
+              <span className="text-2xl font-bold">{stats[s]}</span>
             </CardContent>
           </Card>
         ))}
@@ -84,20 +93,33 @@ const Attendance = () => {
 
       <Card className="shadow-card">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">Student List — {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <div className="h-7 w-7 rounded-lg bg-accent flex items-center justify-center">
+                <Users className="h-3.5 w-3.5 text-accent-foreground" />
+              </div>
+              Student List
+            </CardTitle>
+            <span className="text-xs text-muted-foreground">
+              {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+            </span>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {students.map((student) => {
               const config = statusConfig[student.status];
               return (
-                <div key={student.id} className="flex items-center gap-4 rounded-xl bg-secondary/30 p-3.5 hover:bg-secondary/60 transition-colors">
+                <div key={student.id} className="flex items-center gap-4 rounded-xl bg-muted/40 p-3.5 hover:bg-muted/70 transition-colors">
+                  <div className="h-9 w-9 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold shrink-0">
+                    {student.name.split(" ").map(n => n[0]).join("")}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-card-foreground">{student.name}</p>
                     <p className="text-xs text-muted-foreground">{student.studentId}</p>
                   </div>
-                  <Badge variant={config.variant} className="hidden sm:flex">{config.label}</Badge>
-                  <div className="flex items-center gap-1.5">
+                  <Badge variant={config.variant} className="hidden sm:flex text-xs">{config.label}</Badge>
+                  <div className="flex items-center gap-1">
                     <Button size="sm" variant={student.status === "present" ? "default" : "outline"} className="h-8 w-8 p-0" onClick={() => markStatus(student.id, "present")} title="Present">
                       <Check className="h-3.5 w-3.5" />
                     </Button>
