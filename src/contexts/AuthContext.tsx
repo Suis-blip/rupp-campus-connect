@@ -51,27 +51,52 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+    let isMounted = true;
+
+    const applySession = async (session: Session | null) => {
+      try {
         if (session?.user) {
           const profile = await fetchUserProfile(session.user);
+          if (!isMounted) return;
           setUser(profile);
         } else {
+          if (!isMounted) return;
           setUser(null);
         }
-        setLoading(false);
+      } catch (error) {
+        console.error("Failed to restore user session", error);
+        if (isMounted) setUser(null);
+      } finally {
+        if (isMounted) setLoading(false);
       }
-    );
+    };
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        const profile = await fetchUserProfile(session.user);
-        setUser(profile);
-      }
-      setLoading(false);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      void applySession(session);
     });
 
-    return () => subscription.unsubscribe();
+    void supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => applySession(session))
+      .catch((error) => {
+        console.error("Failed to fetch current session", error);
+        if (isMounted) {
+          setUser(null);
+          setLoading(false);
+        }
+      });
+
+    const loadingSafetyTimeout = window.setTimeout(() => {
+      if (isMounted) setLoading(false);
+    }, 5000);
+
+    return () => {
+      isMounted = false;
+      window.clearTimeout(loadingSafetyTimeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {

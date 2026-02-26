@@ -21,7 +21,13 @@ const Login = () => {
   const [role, setRole] = useState<UserRole>("student");
   const [submitting, setSubmitting] = useState(false);
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-sm text-muted-foreground">Loading your account...</div>
+      </div>
+    );
+  }
   if (isAuthenticated) return <Navigate to="/dashboard" replace />;
 
   const handleLogin = async (e: React.FormEvent) => {
