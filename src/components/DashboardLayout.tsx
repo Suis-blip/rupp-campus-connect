@@ -10,7 +10,13 @@ import { Button } from "@/components/ui/button";
 export function DashboardLayout({ children }: { children: ReactNode }) {
   const { isAuthenticated, loading, user } = useAuth();
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-sm text-muted-foreground">Loading your dashboard...</div>
+      </div>
+    );
+  }
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
   return (
