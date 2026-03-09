@@ -1,11 +1,12 @@
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bell, Send, Plus, Megaphone } from "lucide-react";
+import { Bell, Send, Megaphone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Announcement {
@@ -29,6 +30,47 @@ const catConfig = {
 };
 
 const Messages = () => {
+  const { user } = useAuth();
+  const isStudent = user?.role === "student";
+
+  if (isStudent) return <StudentMessages />;
+  return <TeacherMessages />;
+};
+
+function StudentMessages() {
+  return (
+    <div className="space-y-6 animate-fade-in-up">
+      <div>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">Announcements</h1>
+        <p className="text-sm text-muted-foreground mt-1">Stay up to date with class announcements</p>
+      </div>
+
+      <div className="space-y-3">
+        {mockAnnouncements.map((a) => (
+          <Card key={a.id} className="shadow-card hover:shadow-elevated transition-all duration-200">
+            <CardContent className="p-5">
+              <div className="flex items-start gap-4">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl shrink-0 ${catConfig[a.category].color}`}>
+                  <Bell className="h-4 w-4 text-foreground/70" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                    <h3 className="text-sm font-semibold text-card-foreground">{a.title}</h3>
+                    <Badge variant={catConfig[a.category].variant} className="text-[10px] capitalize">{a.category}</Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{a.content}</p>
+                  <p className="text-xs text-muted-foreground mt-2.5 font-medium">{a.date}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TeacherMessages() {
   const { toast } = useToast();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -97,6 +139,6 @@ const Messages = () => {
       </Tabs>
     </div>
   );
-};
+}
 
 export default Messages;

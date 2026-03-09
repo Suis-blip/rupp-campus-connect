@@ -22,7 +22,7 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 
-const navItems = [
+const teacherNavItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Classes", url: "/classes", icon: School },
   { title: "Attendance", url: "/attendance", icon: ClipboardCheck },
@@ -31,8 +31,19 @@ const navItems = [
   { title: "Messages", url: "/messages", icon: MessageSquare },
 ];
 
+const studentNavItems = [
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "My Classes", url: "/classes", icon: School },
+  { title: "My Attendance", url: "/attendance", icon: ClipboardCheck },
+  { title: "My Grades", url: "/gradebook", icon: BookOpen },
+  { title: "Schedule", url: "/schedule", icon: CalendarDays },
+  { title: "Announcements", url: "/messages", icon: MessageSquare },
+];
+
 export function AppSidebar() {
   const { user, logout } = useAuth();
+  const isStudent = user?.role === "student";
+  const navItems = isStudent ? studentNavItems : teacherNavItems;
 
   return (
     <Sidebar className="border-r border-sidebar-border">
