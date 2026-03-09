@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { BookOpen } from "lucide-react";
+import { BookOpen, GraduationCap } from "lucide-react";
 
 interface GradeEntry {
   id: string;
@@ -52,7 +53,76 @@ const gradeColor: Record<string, string> = {
   "—": "",
 };
 
+// Mock student grades
+const myGrades = [
+  { course: "CS101 - Intro to Programming", midterm: 85, final: 90, assignment: 88, total: 88, grade: "B" },
+  { course: "IT202 - Database Systems", midterm: 92, final: 88, assignment: 95, total: 91, grade: "A" },
+  { course: "CS301 - Algorithms", midterm: null, final: null, assignment: null, total: null, grade: "—" },
+];
+
 const Gradebook = () => {
+  const { user } = useAuth();
+  const isStudent = user?.role === "student";
+
+  if (isStudent) return <StudentGradebook />;
+  return <TeacherGradebook />;
+};
+
+function StudentGradebook() {
+  return (
+    <div className="space-y-6 animate-fade-in-up">
+      <div>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">My Grades</h1>
+        <p className="text-sm text-muted-foreground mt-1">View your grades across all enrolled courses</p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {myGrades.map((g, i) => (
+          <Card key={i} className="shadow-card hover:shadow-elevated transition-all duration-200">
+            <CardHeader className="pb-2">
+              <div className="flex items-start justify-between">
+                <CardTitle className="text-base font-semibold">{g.course}</CardTitle>
+                {g.grade !== "—" ? (
+                  <Badge className={`${gradeColor[g.grade] || "bg-muted text-muted-foreground"} text-sm font-bold px-3 py-1`}>
+                    {g.grade}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-xs">Pending</Badge>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {g.total !== null ? (
+                <div className="space-y-2.5 mt-1">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Midterm (30%)</span>
+                    <span className="font-medium text-card-foreground">{g.midterm}/100</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Final (40%)</span>
+                    <span className="font-medium text-card-foreground">{g.final}/100</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Assignment (30%)</span>
+                    <span className="font-medium text-card-foreground">{g.assignment}/100</span>
+                  </div>
+                  <div className="flex justify-between text-sm pt-2 border-t border-border font-semibold">
+                    <span className="text-foreground">Total</span>
+                    <span className="text-foreground">{g.total}/100</span>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground mt-2">Grades not yet available</p>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TeacherGradebook() {
   const [grades, setGrades] = useState<GradeEntry[]>(initialGrades);
   const [selectedCourse, setSelectedCourse] = useState("cs101");
 
@@ -154,6 +224,6 @@ const Gradebook = () => {
       </Card>
     </div>
   );
-};
+}
 
 export default Gradebook;

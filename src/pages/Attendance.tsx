@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Check, X, Clock, Users } from "lucide-react";
+import { Check, X, Clock, Users, CalendarDays } from "lucide-react";
 
 type Status = "present" | "absent" | "late" | "unmarked";
 
@@ -25,6 +26,17 @@ const initialStudents: Student[] = [
   { id: "8", name: "Phan Bopha", studentId: "RUPP-2024-008", status: "unmarked" },
 ];
 
+// Mock student attendance history
+const studentAttendanceHistory = [
+  { date: "Mar 7, 2026", course: "CS101 - Intro to Programming", status: "present" as Status },
+  { date: "Mar 6, 2026", course: "IT202 - Database Systems", status: "present" as Status },
+  { date: "Mar 5, 2026", course: "CS301 - Algorithms", status: "late" as Status },
+  { date: "Mar 5, 2026", course: "CS101 - Intro to Programming", status: "present" as Status },
+  { date: "Mar 4, 2026", course: "IT202 - Database Systems", status: "absent" as Status },
+  { date: "Mar 3, 2026", course: "CS101 - Intro to Programming", status: "present" as Status },
+  { date: "Mar 3, 2026", course: "CS301 - Algorithms", status: "present" as Status },
+];
+
 const statusConfig: Record<Status, { label: string; variant: "default" | "destructive" | "secondary" | "outline"; icon: typeof Check }> = {
   present: { label: "Present", variant: "default", icon: Check },
   absent: { label: "Absent", variant: "destructive", icon: X },
@@ -40,6 +52,90 @@ const statColors: Record<Status, string> = {
 };
 
 const Attendance = () => {
+  const { user } = useAuth();
+  const isStudent = user?.role === "student";
+
+  if (isStudent) return <StudentAttendance />;
+  return <TeacherAttendance />;
+};
+
+function StudentAttendance() {
+  const studentStats = {
+    present: studentAttendanceHistory.filter((a) => a.status === "present").length,
+    absent: studentAttendanceHistory.filter((a) => a.status === "absent").length,
+    late: studentAttendanceHistory.filter((a) => a.status === "late").length,
+  };
+  const total = studentStats.present + studentStats.absent + studentStats.late;
+  const rate = total > 0 ? ((studentStats.present / total) * 100).toFixed(1) : "0";
+
+  return (
+    <div className="space-y-6 animate-fade-in-up">
+      <div>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">My Attendance</h1>
+        <p className="text-sm text-muted-foreground mt-1">Your attendance history across all classes</p>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-4">
+        <Card className={`border ${statColors.present} shadow-none`}>
+          <CardContent className="p-4 flex items-center justify-between">
+            <span className="text-sm font-medium">Present</span>
+            <span className="text-2xl font-bold">{studentStats.present}</span>
+          </CardContent>
+        </Card>
+        <Card className={`border ${statColors.late} shadow-none`}>
+          <CardContent className="p-4 flex items-center justify-between">
+            <span className="text-sm font-medium">Late</span>
+            <span className="text-2xl font-bold">{studentStats.late}</span>
+          </CardContent>
+        </Card>
+        <Card className={`border ${statColors.absent} shadow-none`}>
+          <CardContent className="p-4 flex items-center justify-between">
+            <span className="text-sm font-medium">Absent</span>
+            <span className="text-2xl font-bold">{studentStats.absent}</span>
+          </CardContent>
+        </Card>
+        <Card className="border bg-accent/30 text-accent-foreground border-accent/20 shadow-none">
+          <CardContent className="p-4 flex items-center justify-between">
+            <span className="text-sm font-medium">Rate</span>
+            <span className="text-2xl font-bold">{rate}%</span>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="shadow-card">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <div className="h-7 w-7 rounded-lg bg-accent flex items-center justify-center">
+              <CalendarDays className="h-3.5 w-3.5 text-accent-foreground" />
+            </div>
+            Attendance History
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-1.5">
+            {studentAttendanceHistory.map((record, i) => {
+              const config = statusConfig[record.status];
+              return (
+                <div key={i} className="flex items-center gap-4 rounded-xl bg-muted/40 p-3.5 hover:bg-muted/70 transition-colors">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-primary text-primary-foreground shrink-0">
+                    <CalendarDays className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-card-foreground">{record.course}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{record.date}</p>
+                  </div>
+                  <Badge variant={config.variant} className="text-xs">{config.label}</Badge>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function TeacherAttendance() {
   const [students, setStudents] = useState<Student[]>(initialStudents);
   const [selectedCourse, setSelectedCourse] = useState("cs101");
 
@@ -138,6 +234,6 @@ const Attendance = () => {
       </Card>
     </div>
   );
-};
+}
 
 export default Attendance;
