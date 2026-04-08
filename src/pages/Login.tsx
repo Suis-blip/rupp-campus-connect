@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { Navigate, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { GraduationCap, Loader2, Mail, Lock, User } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ruppLogo from "@/assets/rupp-logo.png";
+import ruppBuilding from "@/assets/rupp-building.png";
 
 const Login = () => {
   const { login, signup, isAuthenticated, loading } = useAuth();
@@ -20,6 +20,8 @@ const Login = () => {
   const [name, setName] = useState("");
   const [role, setRole] = useState<UserRole>("student");
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [mode, setMode] = useState<"login" | "register">("login");
 
   if (loading) {
     return (
@@ -53,6 +55,7 @@ const Login = () => {
     try {
       await signup(email, password, name, role);
       toast({ title: "Account created!", description: "You can now sign in with your credentials." });
+      setMode("login");
     } catch (err: any) {
       toast({ title: "Signup failed", description: err.message || "Something went wrong.", variant: "destructive" });
     } finally {
@@ -62,129 +65,173 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left: Gradient Panel */}
-      <div className="hidden lg:flex lg:w-1/2 gradient-login relative overflow-hidden items-center justify-center">
-        {/* Decorative circles */}
-        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-white/5" />
-        <div className="absolute bottom-[-15%] left-[-5%] w-[400px] h-[400px] rounded-full bg-white/5" />
-        <div className="absolute top-[40%] left-[20%] w-[200px] h-[200px] rounded-full bg-white/5" />
-
-        <div className="relative z-10 text-center px-12 animate-fade-in-up">
-          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm mx-auto mb-8 shadow-elevated">
-            <GraduationCap className="h-10 w-10 text-white" />
-          </div>
-          <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">RUPP Portal</h1>
-          <p className="text-lg text-white/80 max-w-sm mx-auto leading-relaxed">
-            Royal University of Phnom Penh — Teaching & Learning Management System
-          </p>
-          <div className="mt-12 flex items-center justify-center gap-6 text-white/60 text-sm">
-            <span>📚 Classes</span>
-            <span className="w-1 h-1 rounded-full bg-white/40" />
-            <span>📝 Grades</span>
-            <span className="w-1 h-1 rounded-full bg-white/40" />
-            <span>📅 Schedule</span>
-          </div>
-        </div>
+      {/* Left: Building photo */}
+      <div className="hidden lg:block lg:w-1/2 relative">
+        <img
+          src={ruppBuilding}
+          alt="Royal University of Phnom Penh building"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/20" />
       </div>
 
-      {/* Right: Form Panel */}
+      {/* Right: Form */}
       <div className="flex-1 flex items-center justify-center bg-background p-6 sm:p-8">
-        <div className="w-full max-w-[420px] space-y-8 animate-fade-in-up-delay">
-          {/* Mobile logo */}
-          <div className="flex flex-col items-center gap-3 lg:hidden">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl gradient-primary shadow-glow">
-              <GraduationCap className="h-7 w-7 text-primary-foreground" />
+        <div className="w-full max-w-[440px]">
+          <div className="bg-card rounded-2xl shadow-elevated p-8 sm:p-10 border border-border/40">
+            {/* Logo */}
+            <div className="flex justify-center mb-4">
+              <img src={ruppLogo} alt="RUPP Logo" width={100} height={100} className="object-contain" />
             </div>
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-foreground">RUPP Portal</h1>
-              <p className="text-sm text-muted-foreground mt-1">Royal University of Phnom Penh</p>
-            </div>
+
+            {/* Title */}
+            <h1 className="text-2xl font-extrabold text-foreground text-center tracking-wide">
+              RUPPER CONNECT
+            </h1>
+            <div className="w-24 h-1 bg-destructive mx-auto mt-2 mb-6 rounded-full" />
+
+            {/* Mode heading */}
+            <h2 className="text-lg font-semibold text-foreground text-center mb-5">
+              {mode === "login" ? "Log In" : "Register"}
+            </h2>
+
+            {mode === "login" ? (
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="login-email" className="text-sm text-muted-foreground">Email</Label>
+                  <Input
+                    id="login-email"
+                    type="email"
+                    placeholder="Email"
+                    className="h-11 bg-muted/50 border-border/60"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="login-password" className="text-sm text-muted-foreground">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="login-password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Password"
+                      className="h-11 bg-muted/50 border-border/60 pr-10"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <button type="button" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    Forgot Password?
+                  </button>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-12 font-bold text-base bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-lg"
+                  disabled={submitting}
+                >
+                  {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Log In
+                </Button>
+
+                <p className="text-center text-sm text-muted-foreground mt-4">
+                  Don't have an account?{" "}
+                  <button type="button" onClick={() => setMode("register")} className="text-destructive font-semibold hover:underline">
+                    Register
+                  </button>
+                </p>
+              </form>
+            ) : (
+              <form onSubmit={handleSignup} className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="signup-name" className="text-sm text-muted-foreground">Full Name</Label>
+                  <Input
+                    id="signup-name"
+                    placeholder="Full Name"
+                    className="h-11 bg-muted/50 border-border/60"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="signup-email" className="text-sm text-muted-foreground">Email</Label>
+                  <Input
+                    id="signup-email"
+                    type="email"
+                    placeholder="Email"
+                    className="h-11 bg-muted/50 border-border/60"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="signup-password" className="text-sm text-muted-foreground">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="signup-password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Password"
+                      className="h-11 bg-muted/50 border-border/60 pr-10"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-sm text-muted-foreground">I am a</Label>
+                  <Select value={role} onValueChange={(v) => setRole(v as UserRole)}>
+                    <SelectTrigger className="h-11 bg-muted/50 border-border/60">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="student">Student</SelectItem>
+                      <SelectItem value="teacher">Teacher</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-12 font-bold text-base bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-lg"
+                  disabled={submitting}
+                >
+                  {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Create Account
+                </Button>
+
+                <p className="text-center text-sm text-muted-foreground mt-4">
+                  Already have an account?{" "}
+                  <button type="button" onClick={() => setMode("login")} className="text-destructive font-semibold hover:underline">
+                    Log In
+                  </button>
+                </p>
+              </form>
+            )}
           </div>
 
-          {/* Desktop header */}
-          <div className="hidden lg:block">
-            <h2 className="text-2xl font-bold text-foreground">Welcome back</h2>
-            <p className="text-muted-foreground mt-1">Sign in to your account to continue</p>
-          </div>
-
-          <Card className="shadow-elevated border-border/60">
-            <Tabs defaultValue="login">
-              <CardHeader className="pb-2 pt-6 px-6">
-                <TabsList className="w-full bg-muted/60">
-                  <TabsTrigger value="login" className="flex-1 data-[state=active]:shadow-sm">Sign In</TabsTrigger>
-                  <TabsTrigger value="signup" className="flex-1 data-[state=active]:shadow-sm">Sign Up</TabsTrigger>
-                </TabsList>
-              </CardHeader>
-              <CardContent className="px-6 pb-6">
-                <TabsContent value="login" className="mt-4">
-                  <form onSubmit={handleLogin} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="login-email">Email</Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id="login-email" type="email" placeholder="you@rupp.edu.kh" className="pl-9" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="login-password">Password</Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id="login-password" type="password" placeholder="••••••••" className="pl-9" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                      </div>
-                    </div>
-                    <Button type="submit" className="w-full h-11 font-semibold" disabled={submitting}>
-                      {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Sign in
-                    </Button>
-                  </form>
-                </TabsContent>
-
-                <TabsContent value="signup" className="mt-4">
-                  <form onSubmit={handleSignup} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-name">Full Name</Label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id="signup-name" placeholder="Sok Channary" className="pl-9" value={name} onChange={(e) => setName(e.target.value)} required />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-email">Email</Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id="signup-email" type="email" placeholder="you@rupp.edu.kh" className="pl-9" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-password">Password</Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id="signup-password" type="password" placeholder="••••••••" className="pl-9" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>I am a</Label>
-                      <Select value={role} onValueChange={(v) => setRole(v as UserRole)}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="student">Student</SelectItem>
-                          <SelectItem value="teacher">Teacher</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <Button type="submit" className="w-full h-11 font-semibold" disabled={submitting}>
-                      {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Create Account
-                    </Button>
-                  </form>
-                </TabsContent>
-              </CardContent>
-            </Tabs>
-          </Card>
-
-          <p className="text-center text-xs text-muted-foreground">
+          <p className="text-center text-xs text-muted-foreground mt-6">
             © {new Date().getFullYear()} Royal University of Phnom Penh
           </p>
         </div>
